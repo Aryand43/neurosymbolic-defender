@@ -7,7 +7,7 @@ load_dotenv()
 def pipeline(input_query):
     print(f"\nQuery: {input_query}")
 
-    neural_response = query_neural(input_query)
+    neural_response = query_neural(input_query, model_key="gpt-5") 
     print(f"Neural Output: {neural_response}")
 
     symbolic_check = check_symbolic(input_query, neural_response)
