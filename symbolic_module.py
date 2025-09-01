@@ -1,38 +1,52 @@
-from sympy import simplify, sympify, Eq, diff
+from langchain.agents import Tool, initialize_agent
+from langchain_community.chat_models import ChatOpenAI
+from langchain_community.tools import DuckDuckGoSearchRun
+from sympy import simplify, sympify
 import re
 
-def check_symbolic(question, answer):
-    cleaned_answer = answer.replace(" ", "").lower()
+search = DuckDuckGoSearchRun()
 
-    # Handle derivatives
-    if "derivative" in question.lower():
-        try:
-            expr_match = re.search(r"derivative of (.+)", question.lower())
-            if expr_match:
-                expr = sympify(expr_match.group(1))
-                expected = str(diff(expr).simplify()).replace(" ", "").lower()
-                if expected in cleaned_answer:
-                    return f"Matches expected derivative ({expected})"
-                else:
-                    return f"[Symbolic Check Failed] Expected: {expected}, Neural said: {answer}"
-        except:
-            return "[Symbolic Check Failed]"
+def check_math_equivalence(expr1: str, expr2: str) -> str:
+    try:
+        parsed_1 = sympify(expr1)
+        parsed_2 = sympify(expr2)
+        if simplify(parsed_1 - parsed_2) == 0:
+            return "Math expressions are equivalent"
+        else:
+            return f"Not equivalent: {parsed_1} ≠ {parsed_2}"
+    except:
+        return "[Math Check Error]"
 
-    # Simple factual logic
-    elif "shark" in question.lower():
-        return "False (sharks are not mammals)"
 
-    # Handle basic arithmetic
-    elif "*" in question or "+" in question:
-        try:
-            expr = re.search(r"what is (.+)\??", question.lower())
-            if expr:
-                result = str(eval(expr.group(1))).replace(" ", "").lower()
-                if result in cleaned_answer:
-                    return f"Matches expected arithmetic result ({result})"
-                else:
-                    return f"[Symbolic Math Check Failed] Expected: {result}, Neural said: {answer}"
-        except:
-            return "[Symbolic Math Check Failed]"
+def fact_check(query: str) -> str:
+    try:
+        return search.run(query)
+    except:
+        return "[Fact Check Error]"
 
-    return "No symbolic rule applied"
+def create_agent():
+    tools = [
+        Tool(
+            name="Math Equivalence Checker",
+            func=lambda q: check_math_equivalence(q.split("==")[0], q.split("==")[1]),
+            description="Use this tool to check if two math expressions are symbolically equivalent. Input format: <expr1>==<expr2>"
+        ),
+        Tool(
+            name="Fact Checker",
+            func=fact_check,
+            description="Use this tool to verify factual claims about the real world"
+        )
+    ]
+
+    llm = ChatOpenAI(temperature=0, model="gpt-4")
+    return initialize_agent(tools, llm, agent="zero-shot-react-description", verbose=True)
+
+
+def main():
+    agent = create_agent()
+    print(agent.run("Check if x**2 == x*x"))
+    print(agent.run("Are sharks mammals?"))
+
+
+if __name__ == "__main__":
+    main()
