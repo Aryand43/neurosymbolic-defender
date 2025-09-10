@@ -46,6 +46,9 @@ def query_neural(prompt, model_key="gpt-4o-mini"):
 
     try:
         response = requests.post(BASE_URL, headers=HEADERS, data=payload)
-        return response.json()["choices"][0]["message"]["content"].strip()
+        data = response.json()
+        if "choices" not in data:
+            return f"[ERROR] 'choices' missing in response: {data}"
+        return data["choices"][0]["message"]["content"].strip()
     except Exception as e:
         return f"[ERROR] {str(e)}"
