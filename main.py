@@ -1,17 +1,25 @@
 import re
 from neural_module import query_neural
 from symbolic_module import check_math_equivalence, fact_check
+from belief_graph import BeliefGraph
 from multiprocessing import freeze_support 
 from dotenv import load_dotenv
 load_dotenv()
 
+# Initialize belief graph
+belief_graph = BeliefGraph()
+belief_counter = 1
+
 def pipeline(input_query):
+    global belief_counter
     print(f"\nQuery: {input_query}")
 
     # 1. Neural response from LLM
     try:
-        neural_response = query_neural(input_query, model_key="gpt-5")
+        neural_response = query_neural(input_query, model_key="gpt-4o-mini")
         print(f"Neural Output: {neural_response}")
+        belief_graph.add_belief(f"n{belief_counter}", neural_response, source="neural", certainty=0.9)
+        belief_counter += 1
     except Exception as e:
         neural_response = "[Neural Error]"
         print(f"Neural Output: {neural_response} - {e}")
@@ -24,6 +32,8 @@ def pipeline(input_query):
             raw_expr2 = math_match.group(2).strip()
             symbolic_check = check_math_equivalence(raw_expr1, raw_expr2)
             print(f"Symbolic Check: {symbolic_check}")
+            belief_graph.add_belief(f"n{belief_counter}", f"{raw_expr1} == {raw_expr2} → {symbolic_check}", source="symbolic", certainty=1.0)
+            belief_counter += 1
         else:
             print("Symbolic Check: [Skipped – No symbolic expression detected]")
     except Exception as e:
@@ -33,8 +43,17 @@ def pipeline(input_query):
     try:
         tool_result = fact_check(input_query)
         print(f"Tool Result: {tool_result}")
+        belief_graph.add_belief(f"n{belief_counter}", tool_result, source="tool", certainty=0.8)
+        belief_counter += 1
     except Exception as e:
         print(f"Tool Result: [Error] - {e}")
+
+    # 4. Conflict detection
+    conflicts = belief_graph.detect_conflicts()
+    if conflicts:
+        print(f"Contradictions Detected: {conflicts}")
+    else:
+        print("No Contradictions Detected")
 
 if __name__ == "__main__":
     freeze_support()
