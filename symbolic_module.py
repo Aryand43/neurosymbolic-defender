@@ -24,8 +24,9 @@ search = SerpAPIWrapper()
 
 def check_math_equivalence(expr1: str, expr2: str) -> str:
     try:
-        parsed_expr1 = simplify(sympify(expr1, transformations=transformations))
-        parsed_expr2 = simplify(sympify(expr2, transformations=transformations))
+        parsed_expr1 = simplify(parse_expr(expr1, transformations=transformations))
+        parsed_expr2 = simplify(parse_expr(expr2, transformations=transformations))
+
         return "Equivalent" if parsed_expr1.equals(parsed_expr2) else "Not Equivalent"
     except Exception as e:
         return f"[SymPy Error: {e}]"

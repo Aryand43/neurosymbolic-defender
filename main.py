@@ -22,9 +22,7 @@ def pipeline(input_query):
         if math_match:
             raw_expr1 = math_match.group(1).strip()
             raw_expr2 = math_match.group(2).strip()
-            expr1, _ = extract_expression_from_text(raw_expr1)
-            expr2, _ = extract_expression_from_text(raw_expr2)
-            symbolic_check = check_math_equivalence(expr1, expr2)
+            symbolic_check = check_math_equivalence(raw_expr1, raw_expr2)
             print(f"Symbolic Check: {symbolic_check}")
         else:
             print("Symbolic Check: [Skipped – No symbolic expression detected]")
