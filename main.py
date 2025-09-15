@@ -9,6 +9,8 @@ import argparse
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--model', type=str, default="gpt-4o-mini", help='Model key to use (see neural_module.py)')
+parser.add_argument('--dataset', type=str, default=None, help='Dataset to run evaluation on')
+parser.add_argument('--num_examples', type=int, default=3, help='Number of examples to evaluate')
 args = parser.parse_args()
 
 # Initialize belief graph
@@ -61,11 +63,24 @@ def pipeline(input_query):
         print("No Contradictions Detected")
 
 if __name__ == "__main__":
-    freeze_support()
-    test_inputs = [
-        "Check if x**2 == x*x",         # triggers symbolic check
-        "Are sharks mammals?",          # factual query
-        "Is 3 * (4 + 5) equal to 27?"   # factual/mixed query
-    ]
-    for q in test_inputs:
-        pipeline(q)
+    if __name__ == "__main__":
+        freeze_support()
+
+    if args.dataset:
+        from datasets import load_dataset
+        from datasets import disable_caching
+        disable_caching()
+        print(f"\nRunning dataset eval on: {args.dataset}")
+        dataset = load_dataset(args.dataset, split="test")
+        for i, example in enumerate(dataset.select(range(args.num_examples))):
+            print(f"\n[{i+1}] Example:")
+            q = example.get("question") or example.get("input") or str(example)
+            pipeline(q)
+    else:
+        test_inputs = [
+            "Check if x**2 == x*x",
+            "Are sharks mammals?",
+            "Is 3 * (4 + 5) equal to 27?"
+        ]
+        for q in test_inputs:
+            pipeline(q)

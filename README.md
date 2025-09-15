@@ -32,10 +32,18 @@ Add `OPENAI_API_KEY` and `SERPAPI_API_KEY` to `.env`
 python main.py
 ```
 
-Example queries:
+Test mode runs built-in queries like:
 
-* `x**2 == x*x`
-* `Are sharks mammals?`
+- `x**2 == x*x`
+- `Are sharks mammals?`
+
+Or run on a dataset:
+
+```bash
+python main.py --dataset gsm8k --num_examples 5
+```
+
+Replace `gsm8k` with `proofwriter`, `commonsense-qa`, etc. as needed.
 
 ## System Decomposition
 
