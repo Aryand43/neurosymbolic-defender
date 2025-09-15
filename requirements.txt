@@ -8,3 +8,4 @@ requests
 json
 ddgs
 ls
+pytest 

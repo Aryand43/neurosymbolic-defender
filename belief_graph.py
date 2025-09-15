@@ -19,7 +19,7 @@ class BeliefGraph:
             for node2 in self.graph.nodes(data=True):
                 if node1[0] != node2[0]:
                     if self._is_conflict(node1[1]['content'], node2[1]['content']):
-                        conflicts.append((node1[0], node2[0]))
+                        conflicts.append(tuple(sorted([node1[0], node2[0]])))
         return conflicts
 
     def _is_conflict(self, content1, content2):
@@ -32,3 +32,12 @@ class BeliefGraph:
             plt.show()
         except ImportError:
             print("Install matplotlib to visualize the graph.")
+    
+    def export_to_png(self, filename="belief_graph.png"):
+        try:
+            import matplotlib.pyplot as plt
+            pos = nx.spring_layout(self.graph)
+            nx.draw(self.graph, pos, with_labels=True, node_color='lightblue')
+            plt.savefig(filename)
+        except ImportError:
+            print("Install matplotlib to export the graph.")

@@ -5,6 +5,11 @@ from belief_graph import BeliefGraph
 from multiprocessing import freeze_support 
 from dotenv import load_dotenv
 load_dotenv()
+import argparse
+
+parser = argparse.ArgumentParser()
+parser.add_argument('--model', type=str, default="gpt-4o-mini", help='Model key to use (see neural_module.py)')
+args = parser.parse_args()
 
 # Initialize belief graph
 belief_graph = BeliefGraph()
@@ -16,7 +21,7 @@ def pipeline(input_query):
 
     # 1. Neural response from LLM
     try:
-        neural_response = query_neural(input_query, model_key="gpt-4o-mini")
+        neural_response = query_neural(input_query, model_key=args.model)
         print(f"Neural Output: {neural_response}")
         belief_graph.add_belief(f"n{belief_counter}", neural_response, source="neural", certainty=0.9)
         belief_counter += 1

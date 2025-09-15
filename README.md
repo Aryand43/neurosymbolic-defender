@@ -78,6 +78,7 @@ Example queries:
 * Belief conflict detection outperforms entropy thresholds
 * Scheduler thresholds affect contradiction rate
 * Lattice filters + graphs = lower false positives
+* [GPT-5 model card](https://cdn.openai.com/gpt-5-system-card.pdf) supports our BASIL framing by highlighting instruction adherence and multi-layered defenses.
 
 ## Limitations
 
